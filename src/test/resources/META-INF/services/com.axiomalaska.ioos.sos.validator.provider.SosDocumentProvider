@@ -1,0 +1,3 @@
+com.axiomalaska.ioos.sos.validator.provider.TestSosDocumentProvider
+#com.axiomalaska.ioos.sos.validator.provider.TestKvpHttpSosDocumentProvider
+com.axiomalaska.ioos.sos.validator.provider.TestDirectorySosDocumentProvider

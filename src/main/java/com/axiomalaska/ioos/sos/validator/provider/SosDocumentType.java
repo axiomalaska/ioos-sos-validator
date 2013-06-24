@@ -1,0 +1,10 @@
+package com.axiomalaska.ioos.sos.validator.provider;
+
+public enum SosDocumentType {
+    M1_0_CAPABILITIES,
+    M1_0_DESCRIBE_SENSOR_NETWORK,
+    M1_0_DESCRIBE_SENSOR_STATION,
+    M1_0_DESCRIBE_SENSOR_SENSOR,
+    M1_0_GET_OBSERVATION_TIME_SERIES,
+    M1_0_GET_OBSERVATION_TIME_SERIES_PROFILE
+}
