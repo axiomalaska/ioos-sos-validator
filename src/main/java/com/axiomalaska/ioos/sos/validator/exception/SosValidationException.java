@@ -3,7 +3,8 @@ package com.axiomalaska.ioos.sos.validator.exception;
 
 public class SosValidationException extends Exception{
     private static final long serialVersionUID = -606961866248158184L;
-
+    private Severity severity;
+    
     public static enum Severity{
         FATAL, WARNING, INFO
     }
@@ -14,6 +15,7 @@ public class SosValidationException extends Exception{
 
     public SosValidationException(Severity severity, String message){
         super(message);
+        this.severity = severity;
     }
     
     public SosValidationException(Throwable t){
@@ -22,5 +24,10 @@ public class SosValidationException extends Exception{
 
     public SosValidationException(Severity severity, Throwable t){
         super(t);
+        this.severity = severity;
+    }
+    
+    public Severity getSeverity() {
+        return severity;
     }
 }

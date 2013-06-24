@@ -3,9 +3,14 @@ package com.axiomalaska.ioos.sos.validator.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.xmlbeans.SchemaType;
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
 import org.w3c.dom.Node;
+
+import com.axiomalaska.ioos.sos.validator.exception.InvalidSosDocumentException;
+import com.axiomalaska.ioos.sos.validator.provider.SosDocumentProvider;
+import com.axiomalaska.ioos.sos.validator.provider.SosDocumentType;
 
 public class XmlHelper {
     @SuppressWarnings("unchecked")
@@ -21,5 +26,14 @@ public class XmlHelper {
             }
         }
         return children;
+    }
+    
+    public static <T> T castResult(SosDocumentProvider provider, XmlObject xmlObject, Class<T> clazz, SosDocumentType targetDocType,
+            SchemaType targetSchemaType) throws InvalidSosDocumentException{
+        if (clazz.isAssignableFrom(xmlObject.getClass())) {
+            return (T) clazz.cast(xmlObject);
+        } else {
+            throw new InvalidSosDocumentException(provider, targetDocType, targetSchemaType, xmlObject.schemaType());
+        }
     }
 }

@@ -7,7 +7,7 @@ public class UnsupportedDocumentException extends SosValidationException{
     private static final long serialVersionUID = 2318727281749007447L;
 
     public UnsupportedDocumentException(SosDocumentProvider provider, SosDocumentType doc){
-        this(Severity.FATAL, provider, doc);
+        this(Severity.WARNING, provider, doc);
     }
 
     public UnsupportedDocumentException(Severity severity, SosDocumentProvider provider,

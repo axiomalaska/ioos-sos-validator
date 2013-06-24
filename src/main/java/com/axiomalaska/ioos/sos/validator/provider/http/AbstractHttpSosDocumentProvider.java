@@ -30,8 +30,8 @@ import com.axiomalaska.ioos.sos.validator.provider.SosDocumentProvider;
 public abstract class AbstractHttpSosDocumentProvider extends SosDocumentProvider {
     ClientConnectionManager cm = new PoolingClientConnectionManager();    
     private HttpClient client = new DefaultHttpClient(cm);
-    protected URL url;
-
+    protected URL url;    
+    
     public AbstractHttpSosDocumentProvider(URL url) throws InvalidUrlException {
         super();
         this.url = url;

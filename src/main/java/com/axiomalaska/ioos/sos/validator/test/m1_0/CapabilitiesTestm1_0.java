@@ -17,7 +17,6 @@ import org.junit.Test;
 
 import com.axiomalaska.ioos.sos.IoosSosConstants;
 import com.axiomalaska.ioos.sos.validator.exception.CompositeSosValidationException;
-import com.axiomalaska.ioos.sos.validator.exception.InvalidSosDocumentException;
 import com.axiomalaska.ioos.sos.validator.exception.SosValidationException;
 import com.axiomalaska.ioos.sos.validator.provider.SosDocumentProvider;
 import com.axiomalaska.ioos.sos.validator.provider.SosDocumentType;
@@ -33,12 +32,8 @@ public class CapabilitiesTestm1_0 extends AbstractCapabilitiesTest{
 
     @Before
     public void setUp() throws SosValidationException, CompositeSosValidationException{
-        XmlObject xmlObject = provider.getDocument(SosDocumentType.M1_0_CAPABILITIES);
-        if (!(xmlObject instanceof CapabilitiesDocument)){
-            throw new InvalidSosDocumentException(provider, SosDocumentType.M1_0_CAPABILITIES,
-                    CapabilitiesDocument.type);
-        }
-        xbCapabilities = (CapabilitiesDocument) xmlObject;
+        xbCapabilities = XmlHelper.castResult(provider, provider.getDocument(SosDocumentType.M1_0_CAPABILITIES),
+                CapabilitiesDocument.class, SosDocumentType.M1_0_CAPABILITIES, CapabilitiesDocument.type);
     }
 
     @Override

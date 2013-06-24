@@ -3,6 +3,11 @@ package com.axiomalaska.ioos.sos.validator.provider.http;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 
+import net.opengis.om.x10.ObservationCollectionDocument;
+import net.opengis.sensorML.x101.SensorMLDocument;
+import net.opengis.sos.x10.CapabilitiesDocument;
+import net.opengis.sos.x10.DescribeSensorDocument;
+import net.opengis.sos.x10.DescribeSensorDocument.DescribeSensor;
 import net.opengis.sos.x10.GetCapabilitiesDocument;
 import net.opengis.sos.x10.GetCapabilitiesDocument.GetCapabilities;
 
@@ -10,15 +15,20 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.xmlbeans.XmlObject;
 
+import com.axiomalaska.ioos.sos.IoosSosConstants;
 import com.axiomalaska.ioos.sos.validator.config.InvalidUrlException;
 import com.axiomalaska.ioos.sos.validator.exception.CompositeSosValidationException;
 import com.axiomalaska.ioos.sos.validator.exception.SosValidationException;
 import com.axiomalaska.ioos.sos.validator.provider.SosDocumentType;
+import com.axiomalaska.ioos.sos.validator.util.XmlHelper;
 
-public class PoxHttpSosDocumentProvider extends AbstractHttpSosDocumentProvider{
+public class PoxHttpSosDocumentProvider extends SosServerSosDocumentProvider{
 
-    public PoxHttpSosDocumentProvider(URL url) throws InvalidUrlException {
-        super(url);
+    public PoxHttpSosDocumentProvider(URL url, String networkSmlProcedure, String stationSmlProcedure,
+            String sensorSmlProcedure, GetObservationConstellation timeSeriesConstellation,
+            GetObservationConstellation timeSeriesProfileConstellation) throws InvalidUrlException {
+        super(url, networkSmlProcedure, stationSmlProcedure, sensorSmlProcedure, timeSeriesConstellation,
+                timeSeriesProfileConstellation);
     }
     
     protected XmlObject sendRequest(XmlObject xmlObject) throws SosValidationException, CompositeSosValidationException {
@@ -30,34 +40,35 @@ public class PoxHttpSosDocumentProvider extends AbstractHttpSosDocumentProvider{
         }        
         return sendRequest(request);        
     }
-    
-    protected XmlObject getCapabilitiesm1_0() throws SosValidationException, CompositeSosValidationException{
+
+    @Override
+    protected CapabilitiesDocument getCapabilitiesm1_0() throws SosValidationException, CompositeSosValidationException{
         GetCapabilitiesDocument xbGetCapabilitiesDoc = GetCapabilitiesDocument.Factory.newInstance();
         GetCapabilities xbGetCapabilities = xbGetCapabilitiesDoc.addNewGetCapabilities();
         xbGetCapabilities.setService(SosConstants.SOS);
         xbGetCapabilities.addNewAcceptVersions().addNewVersion().setStringValue(SosConstants.SOS_V1);
-        return sendRequest(xbGetCapabilitiesDoc);
+        XmlObject result = sendRequest(xbGetCapabilitiesDoc);
+        return XmlHelper.castResult(this, result, CapabilitiesDocument.class, SosDocumentType.M1_0_CAPABILITIES, CapabilitiesDocument.type);
     }
 
     @Override
-    protected XmlObject getDocumentXml(SosDocumentType document) throws SosValidationException, CompositeSosValidationException{
-        switch(document){
-            case M1_0_CAPABILITIES:
-                return getCapabilitiesm1_0();
-            case M1_0_SENSOR_ML_NETWORK:
-                break;
-            case M1_0_SENSOR_ML_STATION:
-                break;
-            case M1_0_SENSOR_ML_SENSOR:
-                break;
-            case M1_0_OBSERVATION_COLLECTION:
-                break;
-            case M1_0_SWE_TIME_SERIES:
-                break;
-            case M1_0_SWE_TIME_SERIES_PROFILE:
-                break;                
-        }
-        return null;
+    protected SensorMLDocument describeSensorm1_0(String procedure, SosDocumentType docType)
+            throws SosValidationException, CompositeSosValidationException {
+        DescribeSensorDocument xbDescribeSensorDoc = DescribeSensorDocument.Factory.newInstance();
+        DescribeSensor xbDescribeSensor = xbDescribeSensorDoc.addNewDescribeSensor();
+        xbDescribeSensor.setService(SosConstants.SERVICE);
+        xbDescribeSensor.setVersion(SosConstants.VERSION);
+        xbDescribeSensor.setOutputFormat(IoosSosConstants.SML_PROFILE_M10);
+        xbDescribeSensor.setProcedure(procedure);
+        XmlObject result = sendRequest(xbDescribeSensor);
+        return XmlHelper.castResult(this, result, SensorMLDocument.class, docType, SensorMLDocument.type);
     }
 
+    @Override
+    protected ObservationCollectionDocument getObservationm1_0(
+            GetObservationConstellation constellation, SosDocumentType docType)
+            throws SosValidationException, CompositeSosValidationException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

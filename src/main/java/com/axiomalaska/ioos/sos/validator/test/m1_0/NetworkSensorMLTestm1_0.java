@@ -6,11 +6,11 @@ import org.apache.xmlbeans.XmlObject;
 import org.junit.Before;
 
 import com.axiomalaska.ioos.sos.validator.exception.CompositeSosValidationException;
-import com.axiomalaska.ioos.sos.validator.exception.InvalidSosDocumentException;
 import com.axiomalaska.ioos.sos.validator.exception.SosValidationException;
 import com.axiomalaska.ioos.sos.validator.provider.SosDocumentProvider;
 import com.axiomalaska.ioos.sos.validator.provider.SosDocumentType;
 import com.axiomalaska.ioos.sos.validator.test.AbstractSensorMLTest;
+import com.axiomalaska.ioos.sos.validator.util.XmlHelper;
 
 public class NetworkSensorMLTestm1_0 extends AbstractSensorMLTest{
     public NetworkSensorMLTestm1_0(SosDocumentProvider provider) {
@@ -21,12 +21,8 @@ public class NetworkSensorMLTestm1_0 extends AbstractSensorMLTest{
 
     @Before
     public void setUp() throws SosValidationException, CompositeSosValidationException{
-        XmlObject xmlObject = provider.getDocument(SosDocumentType.M1_0_SENSOR_ML_NETWORK);
-        if (!(xmlObject instanceof SensorMLDocument)){
-            throw new InvalidSosDocumentException(provider, SosDocumentType.M1_0_SENSOR_ML_NETWORK,
-                    SensorMLDocument.type);
-        }
-        xbSensorML = (SensorMLDocument) xmlObject;
+        xbSensorML = XmlHelper.castResult(provider, provider.getDocument(SosDocumentType.M1_0_SENSOR_ML_NETWORK),
+                SensorMLDocument.class, SosDocumentType.M1_0_SENSOR_ML_NETWORK, SensorMLDocument.type);
     }
 
     @Override

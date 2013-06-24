@@ -10,8 +10,8 @@ import com.axiomalaska.ioos.sos.validator.exception.CompositeSosValidationExcept
 import com.axiomalaska.ioos.sos.validator.exception.SosValidationException;
 import com.axiomalaska.ioos.sos.validator.provider.SosDocumentType;
 
-public class IoosGoogleCodeProviderm1_0 extends StaticHttpSosDocumentProvider{
-    public IoosGoogleCodeProviderm1_0() throws MalformedURLException, InvalidUrlException{
+public class IoosGoogleCodeProvider extends StaticHttpSosDocumentProvider{
+    public IoosGoogleCodeProvider() throws MalformedURLException, InvalidUrlException{
         super(new URL(SosConstants.IOOS_GOOGLE_CODE_M1_0_TEMPLATE_URL));
     }
     

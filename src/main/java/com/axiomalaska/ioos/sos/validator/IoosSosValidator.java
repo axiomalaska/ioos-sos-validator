@@ -2,6 +2,10 @@ package com.axiomalaska.ioos.sos.validator;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -14,11 +18,14 @@ import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 
+import com.axiomalaska.ioos.sos.validator.exception.CompositeSosValidationException;
+import com.axiomalaska.ioos.sos.validator.exception.SosValidationException;
+import com.axiomalaska.ioos.sos.validator.exception.SosValidationException.Severity;
 import com.axiomalaska.ioos.sos.validator.provider.DirectorySosDocumentProvider;
 import com.axiomalaska.ioos.sos.validator.provider.SosDocumentProvider;
 import com.axiomalaska.ioos.sos.validator.provider.SosDocumentProviderRepository;
 import com.axiomalaska.ioos.sos.validator.provider.SosDocumentType;
-import com.axiomalaska.ioos.sos.validator.provider.http.IoosGoogleCodeProviderm1_0;
+import com.axiomalaska.ioos.sos.validator.provider.http.IoosGoogleCodeProvider;
 import com.axiomalaska.ioos.sos.validator.provider.http.KvpHttpSosDocumentProvider;
 import com.axiomalaska.ioos.sos.validator.provider.http.PoxHttpSosDocumentProvider;
 import com.axiomalaska.ioos.sos.validator.test.AllTests;
@@ -67,7 +74,7 @@ public class IoosSosValidator {
             String version = line.getOptionValue(GOOGLE_CODE);
             if (version.equals("1.0")){
                 try {
-                    SosDocumentProviderRepository.addProvider(new IoosGoogleCodeProviderm1_0());
+                    SosDocumentProviderRepository.addProvider(new IoosGoogleCodeProvider());
                 } catch (Exception e){
                     System.out.println("Google code URL is invalid, contact developer.");
                     System.exit(1);
@@ -83,7 +90,7 @@ public class IoosSosValidator {
                 //try a relative path
                 rootDir = new File("./" + dirStr);
             }
-            
+
             if (!rootDir.exists()) {
                 System.out.println("Local directory " + dirStr + " doesn't exist");
                 System.out.println("Current directory is " + System.getProperty("user.dir"));
@@ -96,7 +103,7 @@ public class IoosSosValidator {
             
             if (kvpUrlValue != null) {
                 try {
-                    SosDocumentProviderRepository.addProvider(new KvpHttpSosDocumentProvider(new URL(kvpUrlValue)));
+//                    SosDocumentProviderRepository.addProvider(new KvpHttpSosDocumentProvider(new URL(kvpUrlValue)));
                 } catch (Exception e) {
                     System.out.println("Invalid kvp url:" + e.getMessage() );
                     System.exit(1);
@@ -105,7 +112,7 @@ public class IoosSosValidator {
 
             if (poxUrlValue != null) {
                 try {
-                    SosDocumentProviderRepository.addProvider(new PoxHttpSosDocumentProvider(new URL(poxUrlValue)));
+//                    SosDocumentProviderRepository.addProvider(new PoxHttpSosDocumentProvider(new URL(poxUrlValue)));
                 } catch (Exception e) {
                     System.out.println("Invalid pox url:" + e.getMessage() );
                     System.exit(1);
@@ -144,14 +151,59 @@ public class IoosSosValidator {
         System.out.println("Run time: " + result.getRunTime());        
 
         System.out.println();
-        if (result.wasSuccessful()){
-            System.out.println("VALIDATION SUCCESSFUL!");
+        
+        List<Throwable> exceptions = new ArrayList<Throwable>();
+        for (Failure failure : result.getFailures()){
+            exceptions.add(failure.getException());
+        }
+        
+        Map<Severity,Integer> severityCounts = processExceptions(exceptions);
+        System.out.println();
+        System.out.println("Failure severity summary:");
+        for (Severity severity : Severity.values()) {
+            System.out.println(severity.name() + ": " + severityCounts.get(severity));
+        }
+        
+        System.out.println();
+        if (severityCounts.get(Severity.FATAL).equals(0)){
+            System.out.println("VALIDATION SUCCESSFUL");
         } else {
             System.out.println("VALIDATION FAILED");
             System.exit(1);
         }
     }
     
+    private static Map<Severity,Integer> processExceptions(List<Throwable> exceptions) {
+        HashMap<Severity, Integer> map = new HashMap<Severity,Integer>();
+        for (Severity severity : Severity.values()) {
+            map.put(severity, 0);
+        }
+        processExceptions(exceptions, map);
+        return map;
+    }
+
+    private static void processExceptions(List<Throwable> exceptions,
+            Map<Severity,Integer> map) {
+        for (Throwable exception : exceptions) {
+            processException(exception, map);
+        }
+    }
+
+    private static void processException(Throwable exception, Map<Severity,Integer> map) {
+        if (exception instanceof SosValidationException) {
+            Severity severity = ((SosValidationException) exception).getSeverity();
+            map.put(severity, map.get(severity) + 1);
+        } else if (exception instanceof CompositeSosValidationException) {
+            CompositeSosValidationException compositeException = (CompositeSosValidationException) exception;
+            for (SosValidationException sve : compositeException.getExceptions()) {
+                processException(sve, map);
+            }
+        } else {
+            //if other type of exception, assume fatal
+            map.put(Severity.FATAL, map.get(Severity.FATAL) + 1);
+        }
+    }
+        
     private static void displayHelp(Options options){
         HelpFormatter formatter = new HelpFormatter();
         String usage = "java -jar ioos-sos-validator.jar [OPTIONS]";
