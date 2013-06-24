@@ -44,10 +44,12 @@ public class KvpHttpSosDocumentProvider extends AbstractHttpSosDocumentProvider{
                 break;
             case M1_0_SENSOR_ML_SENSOR:
                 break;
-            case M1_0_OBSERVATION_COLLECTION_TIME_SERIES:
+            case M1_0_OBSERVATION_COLLECTION:
                 break;
-            case M1_0_OBSERVATION_COLLECTION_TIME_SERIES_PROFILE:
+            case M1_0_SWE_TIME_SERIES:
                 break;
+            case M1_0_SWE_TIME_SERIES_PROFILE:
+                break;                
         }
         return null;
     }

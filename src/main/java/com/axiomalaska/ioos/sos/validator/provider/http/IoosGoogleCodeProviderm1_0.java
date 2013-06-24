@@ -14,7 +14,7 @@ public class IoosGoogleCodeProviderm1_0 extends StaticHttpSosDocumentProvider{
     public IoosGoogleCodeProviderm1_0() throws MalformedURLException, InvalidUrlException{
         super(new URL(SosConstants.IOOS_GOOGLE_CODE_M1_0_TEMPLATE_URL));
     }
-
+    
     @Override
     protected XmlObject getDocumentXml(SosDocumentType document)
             throws SosValidationException, CompositeSosValidationException {
@@ -27,10 +27,12 @@ public class IoosGoogleCodeProviderm1_0 extends StaticHttpSosDocumentProvider{
                 return sendRequest("/SML-DescribeSensor-Station.xml");
             case M1_0_SENSOR_ML_SENSOR:
                 break;
-            case M1_0_OBSERVATION_COLLECTION_TIME_SERIES:
-                break;
-            case M1_0_OBSERVATION_COLLECTION_TIME_SERIES_PROFILE:
-                break;            
+            case M1_0_OBSERVATION_COLLECTION:
+                return sendRequest("/OM-GetObservation.xml");
+            case M1_0_SWE_TIME_SERIES:
+                return sendRequest("/SWE-MultiStation-TimeSeries.xml");
+            case M1_0_SWE_TIME_SERIES_PROFILE:
+                return sendRequest("/SWE-SingleStation-TimeSeriesProfile.xml");
         }
         return null;
     }
