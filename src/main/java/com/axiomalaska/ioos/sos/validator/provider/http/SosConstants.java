@@ -9,4 +9,6 @@ public class SosConstants {
     
     public static final String SOS_V1 = "1.0.0";
     public static final String GET_CAPABILITIES = "GetCapabilities";
+    
+    public static final String IOOS_GOOGLE_CODE_M1_0_TEMPLATE_URL = "https://ioostech.googlecode.com/svn/trunk/templates/Milestone1.0";
 }

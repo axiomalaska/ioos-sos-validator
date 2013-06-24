@@ -21,10 +21,10 @@ import com.axiomalaska.ioos.sos.validator.exception.InvalidSosDocumentException;
 import com.axiomalaska.ioos.sos.validator.exception.SosValidationException;
 import com.axiomalaska.ioos.sos.validator.provider.SosDocumentProvider;
 import com.axiomalaska.ioos.sos.validator.provider.SosDocumentType;
-import com.axiomalaska.ioos.sos.validator.test.AbstractGetCapabilitiesTest;
+import com.axiomalaska.ioos.sos.validator.test.AbstractCapabilitiesTest;
 import com.axiomalaska.ioos.sos.validator.util.XmlHelper;
 
-public class CapabilitiesTestm1_0 extends AbstractGetCapabilitiesTest{
+public class CapabilitiesTestm1_0 extends AbstractCapabilitiesTest{
     public CapabilitiesTestm1_0(SosDocumentProvider provider) {
         super(provider);
     }

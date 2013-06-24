@@ -41,7 +41,7 @@ public class IoosSosValidatorIT {
   
     @Test
     public void testLocalDirectoryValidation() throws IOException, InterruptedException{
-        assertEquals( 0, exec( shadedJar, new String[]{"--" + IoosSosValidator.DIR, "../src/test/resources/documents"} ) );
+        assertEquals( 0, exec( shadedJar, new String[]{"--" + IoosSosValidator.DIR, "src/test/resources/documents"} ) );
     }
 
     @Test

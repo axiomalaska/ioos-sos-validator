@@ -18,6 +18,7 @@ import com.axiomalaska.ioos.sos.validator.provider.DirectorySosDocumentProvider;
 import com.axiomalaska.ioos.sos.validator.provider.SosDocumentProvider;
 import com.axiomalaska.ioos.sos.validator.provider.SosDocumentProviderRepository;
 import com.axiomalaska.ioos.sos.validator.provider.SosDocumentType;
+import com.axiomalaska.ioos.sos.validator.provider.http.IoosGoogleCodeProviderm1_0;
 import com.axiomalaska.ioos.sos.validator.provider.http.KvpHttpSosDocumentProvider;
 import com.axiomalaska.ioos.sos.validator.provider.http.PoxHttpSosDocumentProvider;
 import com.axiomalaska.ioos.sos.validator.test.AllTests;
@@ -29,6 +30,7 @@ public class IoosSosValidator {
     public static final String KVP_URL = "kvpUrl";
     public static final String POX_URL = "poxUrl";
     public static final String DIR = "dir";
+    public static final String GOOGLE_CODE = "google-code";
     
     public static void main(String[] args){
         Options options = new Options();
@@ -43,21 +45,37 @@ public class IoosSosValidator {
         urlGroup.addOption(poxUrl);
         
         Option dir = new Option("d",DIR,true,"Path to local directory containing xml files with standard names");
+        Option googleCode = new Option("gc",GOOGLE_CODE,true,"Validate against Google Code IOOS SOS template respository (specify version, i.e. 1.0)");
         
         options.addOption(help);
         options.addOption(dir);
+        options.addOption(googleCode);
         options.addOptionGroup(urlGroup);        
         
         CommandLine line = null;
         try {
             line = new BasicParser().parse( options, args );            
         } catch (ParseException e) {
-            System.out.println( "Unexpected exception:" + e.getMessage() );
+            System.out.println( "Unexpected exception: " + e.getMessage() );
+            System.exit(1);
         }
-        
+
         if (line.hasOption(HELP)) {
             displayHelp(options);
-            return;
+            System.exit(0);
+        } else if (line.hasOption(GOOGLE_CODE)){
+            String version = line.getOptionValue(GOOGLE_CODE);
+            if (version.equals("1.0")){
+                try {
+                    SosDocumentProviderRepository.addProvider(new IoosGoogleCodeProviderm1_0());
+                } catch (Exception e){
+                    System.out.println("Google code URL is invalid, contact developer.");
+                    System.exit(1);
+                }
+            } else {
+                System.out.println("Invalid milestone version. Valid versions are: 1.0.");
+                System.exit(1);                
+            }
         } else if (line.hasOption(DIR)){
             String dirStr = line.getOptionValue(DIR);
             File rootDir = new File(dirStr);
@@ -69,7 +87,7 @@ public class IoosSosValidator {
             if (!rootDir.exists()) {
                 System.out.println("Local directory " + dirStr + " doesn't exist");
                 System.out.println("Current directory is " + System.getProperty("user.dir"));
-                return;
+                System.exit(1);
             }
             SosDocumentProviderRepository.addProvider(new DirectorySosDocumentProvider(rootDir));
         } else if (line.hasOption(URL) || (line.hasOption(KVP_URL) || line.hasOption(POX_URL))){
@@ -81,6 +99,7 @@ public class IoosSosValidator {
                     SosDocumentProviderRepository.addProvider(new KvpHttpSosDocumentProvider(new URL(kvpUrlValue)));
                 } catch (Exception e) {
                     System.out.println("Invalid kvp url:" + e.getMessage() );
+                    System.exit(1);
                 }
             }
 
@@ -89,16 +108,17 @@ public class IoosSosValidator {
                     SosDocumentProviderRepository.addProvider(new PoxHttpSosDocumentProvider(new URL(poxUrlValue)));
                 } catch (Exception e) {
                     System.out.println("Invalid pox url:" + e.getMessage() );
+                    System.exit(1);
                 }
             }
         } else {
             displayHelp(options);
-            return;            
+            System.exit(1); 
         }
 
         if (SosDocumentProviderRepository.providers().isEmpty()){
             System.out.println("No SosDocumentProviders! Exiting.");
-            return;
+            System.exit(1);
         } else {
             System.out.println("SosDocumentProviders:");
             for (SosDocumentProvider provider : SosDocumentProviderRepository.providers()){
@@ -116,7 +136,7 @@ public class IoosSosValidator {
 
         System.out.println();
         System.out.println("Tests complete");
-        
+
         System.out.println();
         System.out.println("Tests performed: " + result.getRunCount());
         System.out.println("Tests ignored: " + result.getIgnoreCount());
@@ -137,8 +157,8 @@ public class IoosSosValidator {
         String usage = "java -jar ioos-sos-validator.jar [OPTIONS]";
         
         String header = "\nIOOS SOS Validator, version " + VersionHelper.getVersion()
-        		+ "\nValidate SOS response documents to IOOS standards. Can validate against a live SOS server or a local"
-                + " directory of XML files. Currently supports IOOS SOS milestone 1.0.";
+        		+ "\nValidate SOS response documents to IOOS standards. Can validate against a live SOS server, a local"
+                + " directory of XML files, or the IOOS Google Code SOS response respository. Currently supports IOOS SOS milestone 1.0.";
         
         StringBuilder footer = new StringBuilder("\nLocal directory filename patterns:");
         for (SosDocumentType docType : SosDocumentType.values()) {
