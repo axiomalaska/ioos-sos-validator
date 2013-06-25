@@ -1,4 +1,4 @@
-package com.axiomalaska.ioos.sos.validator.config;
+package com.axiomalaska.ioos.sos.validator.exception;
 
 public class InvalidUrlException extends Exception{
     private static final long serialVersionUID = -3396376124947845809L;

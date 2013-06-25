@@ -21,8 +21,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.xmlbeans.XmlObject;
 
-import com.axiomalaska.ioos.sos.validator.config.InvalidUrlException;
 import com.axiomalaska.ioos.sos.validator.exception.CompositeSosValidationException;
+import com.axiomalaska.ioos.sos.validator.exception.InvalidUrlException;
 import com.axiomalaska.ioos.sos.validator.exception.SosHttpRequestException;
 import com.axiomalaska.ioos.sos.validator.exception.SosValidationException;
 import com.axiomalaska.ioos.sos.validator.provider.SosDocumentProvider;

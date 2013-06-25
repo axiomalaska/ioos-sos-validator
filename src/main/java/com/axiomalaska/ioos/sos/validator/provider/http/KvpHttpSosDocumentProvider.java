@@ -1,5 +1,6 @@
 package com.axiomalaska.ioos.sos.validator.provider.http;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,20 +13,23 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.xmlbeans.XmlObject;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import com.axiomalaska.ioos.sos.IoosSosConstants;
-import com.axiomalaska.ioos.sos.validator.config.InvalidUrlException;
 import com.axiomalaska.ioos.sos.validator.exception.CompositeSosValidationException;
+import com.axiomalaska.ioos.sos.validator.exception.InvalidRequestConfigurationException;
+import com.axiomalaska.ioos.sos.validator.exception.InvalidUrlException;
 import com.axiomalaska.ioos.sos.validator.exception.SosValidationException;
 import com.axiomalaska.ioos.sos.validator.provider.SosDocumentType;
+import com.axiomalaska.ioos.sos.validator.provider.http.config.GetObservationConstellation;
+import com.axiomalaska.ioos.sos.validator.provider.http.config.RequestConfiguration;
 import com.axiomalaska.ioos.sos.validator.util.XmlHelper;
 
 public class KvpHttpSosDocumentProvider extends SosServerSosDocumentProvider{    
-    public KvpHttpSosDocumentProvider(URL url, String networkSmlProcedure, String stationSmlProcedure,
-            String sensorSmlProcedure, GetObservationConstellation timeSeriesConstellation,
-            GetObservationConstellation timeSeriesProfileConstellation) throws InvalidUrlException {
-        super(url, networkSmlProcedure, stationSmlProcedure, sensorSmlProcedure, timeSeriesConstellation,
-                timeSeriesProfileConstellation);
+    public KvpHttpSosDocumentProvider(URL url, RequestConfiguration config)
+            throws InvalidUrlException, MalformedURLException, InvalidRequestConfigurationException {
+        super(url, config);
     }
 
     protected List<NameValuePair> getBaseQueryParams() {
@@ -62,7 +66,35 @@ public class KvpHttpSosDocumentProvider extends SosServerSosDocumentProvider{
     protected ObservationCollectionDocument getObservationm1_0(
             GetObservationConstellation constellation, SosDocumentType docType)
             throws SosValidationException, CompositeSosValidationException {
-        // TODO Auto-generated method stub
-        return null;
+        List<NameValuePair> kvps = getBaseQueryParams();
+        kvps.add(new BasicNameValuePair(SosConstants.REQUEST, SosConstants.GET_OBSERVATION));
+        kvps.add(new BasicNameValuePair(SosConstants.VERSION, SosConstants.SOS_V1));        
+        kvps.add(new BasicNameValuePair(SosConstants.OFFERING, constellation.getOffering()));
+        for (String procedure : constellation.getProcedures()) {
+            kvps.add(new BasicNameValuePair(SosConstants.PROCEDURE, procedure));
+        }
+        for (String observedProperty : constellation.getObservedProperties()) {
+            kvps.add(new BasicNameValuePair(SosConstants.OBSERVED_PROPERTY, observedProperty));
+        }
+        
+        if (constellation.getStartTime() != null || constellation.getEndTime() != null) {
+            StringBuilder timeString = new StringBuilder();
+            if (constellation.getStartTime() != null) {
+                timeString.append(constellation.getStartTime().toString());
+            } else {
+                timeString.append(DEFAULT_START_TIME.toString());
+            }
+
+            if (constellation.getEndTime() != null) {
+                timeString.append(constellation.getEndTime().toString());
+            } else {
+                timeString.append(new DateTime(DateTimeZone.UTC).toString());
+            }            
+        }
+        
+        kvps.add(new BasicNameValuePair(SosConstants.RESPONSE_FORMAT, IoosSosConstants.OM_PROFILE_M10));
+
+        XmlObject result = sendRequest(new HttpGet(getUrl(kvps)));
+        return XmlHelper.castResult(this, result, ObservationCollectionDocument.class, docType, ObservationCollectionDocument.type);
     }
 }

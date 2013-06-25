@@ -11,7 +11,6 @@ import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.junit.runner.JUnitCore;
@@ -28,28 +27,30 @@ import com.axiomalaska.ioos.sos.validator.provider.SosDocumentType;
 import com.axiomalaska.ioos.sos.validator.provider.http.IoosGoogleCodeProvider;
 import com.axiomalaska.ioos.sos.validator.provider.http.KvpHttpSosDocumentProvider;
 import com.axiomalaska.ioos.sos.validator.provider.http.PoxHttpSosDocumentProvider;
+import com.axiomalaska.ioos.sos.validator.provider.http.config.RequestConfiguration;
 import com.axiomalaska.ioos.sos.validator.test.AllTests;
 import com.axiomalaska.ioos.sos.validator.util.VersionHelper;
+import com.axiomalaska.ioos.sos.validator.xstream.XStreamRepository;
 
 public class IoosSosValidator {
     public static final String HELP = "help";
     public static final String URL = "url";
-    public static final String KVP_URL = "kvpUrl";
-    public static final String POX_URL = "poxUrl";
+    public static final String KVP_URL = "kvp-url";
+    public static final String POX_URL = "pox-url";
+    public static final String REQUEST_CONFIG = "request-config";
+    public static final String EXAMPLE_REQUEST_CONFIG = "example-request-config";
     public static final String DIR = "dir";
     public static final String GOOGLE_CODE = "google-code";
     
     public static void main(String[] args){
         Options options = new Options();
         
-        OptionGroup urlGroup = new OptionGroup();
-        Option help = new Option("?",HELP,true,"Display help message.");
+        Option help = new Option("?",HELP,false,"Display help message.");
         Option url = new Option("u",URL,true,"Endpoint for all requests to SOS server. Overridden by kvpUrl and poxUrl.");
         Option kvpUrl = new Option("k",KVP_URL,true,"Endpoint for HTTP KVP (GET) requests to SOS server. Defaults to url.");
         Option poxUrl = new Option("p",POX_URL,true,"Endpoint for HTTP POX (plain-old-XML POST) requests to SOS server. Defaults to url.");
-        urlGroup.addOption(url);
-        urlGroup.addOption(kvpUrl);
-        urlGroup.addOption(poxUrl);
+        Option requestConfig = new Option("rc",REQUEST_CONFIG,true,"Path to xml configuration for SOS requests.");        
+        Option exampleRequestConfig = new Option("erc",EXAMPLE_REQUEST_CONFIG,false,"Print an example request configuration.");
         
         Option dir = new Option("d",DIR,true,"Path to local directory containing xml files with standard names");
         Option googleCode = new Option("gc",GOOGLE_CODE,true,"Validate against Google Code IOOS SOS template respository (specify version, i.e. 1.0)");
@@ -57,7 +58,11 @@ public class IoosSosValidator {
         options.addOption(help);
         options.addOption(dir);
         options.addOption(googleCode);
-        options.addOptionGroup(urlGroup);        
+        options.addOption(url);
+        options.addOption(kvpUrl);
+        options.addOption(poxUrl);
+        options.addOption(requestConfig);
+        options.addOption(exampleRequestConfig);
         
         CommandLine line = null;
         try {
@@ -70,6 +75,9 @@ public class IoosSosValidator {
         if (line.hasOption(HELP)) {
             displayHelp(options);
             System.exit(0);
+        } else if (line.hasOption(EXAMPLE_REQUEST_CONFIG)) {
+            System.out.println(XStreamRepository.instance().toXML(RequestConfiguration.exampleConfig()));
+            System.exit(0);            
         } else if (line.hasOption(GOOGLE_CODE)){
             String version = line.getOptionValue(GOOGLE_CODE);
             if (version.equals("1.0")){
@@ -85,12 +93,7 @@ public class IoosSosValidator {
             }
         } else if (line.hasOption(DIR)){
             String dirStr = line.getOptionValue(DIR);
-            File rootDir = new File(dirStr);
-            if (!rootDir.exists()) {
-                //try a relative path
-                rootDir = new File("./" + dirStr);
-            }
-
+            File rootDir = getFile(dirStr);
             if (!rootDir.exists()) {
                 System.out.println("Local directory " + dirStr + " doesn't exist");
                 System.out.println("Current directory is " + System.getProperty("user.dir"));
@@ -101,9 +104,31 @@ public class IoosSosValidator {
             String kvpUrlValue = line.hasOption(KVP_URL) ? line.getOptionValue(KVP_URL) : line.getOptionValue(URL);
             String poxUrlValue = line.hasOption(POX_URL) ? line.getOptionValue(POX_URL) : line.getOptionValue(URL);
             
+            if (!line.hasOption(REQUEST_CONFIG)) {
+                System.out.println("-" + requestConfig.getOpt() + " (--" + requestConfig.getLongOpt() + ") is required"
+                        + " when testing SOS servers");
+                System.exit(1);                
+            }
+            
+            String requestConfigValue = line.getOptionValue(REQUEST_CONFIG);
+            File requestConfigFile = getFile(requestConfigValue);
+            if (!requestConfigFile.exists()){
+                System.out.println("-" + requestConfig.getOpt() + " (--" + requestConfig.getLongOpt() + ") file " +
+                        requestConfigValue + " doesn't exist");
+                System.exit(1);                                
+            }
+            Object requestConfigObject = XStreamRepository.instance().fromXML(requestConfigFile);
+            if (!(requestConfigObject instanceof RequestConfiguration)) {
+                System.out.println("-" + requestConfig.getOpt() + " (--" + requestConfig.getLongOpt() + ") file " +
+                        requestConfigValue + " is not a valid RequestConfiguration");
+                System.exit(1);                                                
+            }
+            RequestConfiguration requestConfiguration = (RequestConfiguration) requestConfigObject;
+
             if (kvpUrlValue != null) {
                 try {
-//                    SosDocumentProviderRepository.addProvider(new KvpHttpSosDocumentProvider(new URL(kvpUrlValue)));
+                    SosDocumentProviderRepository.addProvider(new KvpHttpSosDocumentProvider(
+                            new URL(kvpUrlValue), requestConfiguration));
                 } catch (Exception e) {
                     System.out.println("Invalid kvp url:" + e.getMessage() );
                     System.exit(1);
@@ -112,7 +137,8 @@ public class IoosSosValidator {
 
             if (poxUrlValue != null) {
                 try {
-//                    SosDocumentProviderRepository.addProvider(new PoxHttpSosDocumentProvider(new URL(poxUrlValue)));
+                    SosDocumentProviderRepository.addProvider(new PoxHttpSosDocumentProvider(
+                            new URL(poxUrlValue), requestConfiguration));
                 } catch (Exception e) {
                     System.out.println("Invalid pox url:" + e.getMessage() );
                     System.exit(1);
@@ -173,6 +199,15 @@ public class IoosSosValidator {
         }
     }
     
+    private static File getFile(String path) {
+        File file = new File(path);
+        //if absolute doesn't exist, try a relative path
+        if (!file.exists()) {
+            file = new File("./" + path);
+        }
+        return file;
+    }
+    
     private static Map<Severity,Integer> processExceptions(List<Throwable> exceptions) {
         HashMap<Severity, Integer> map = new HashMap<Severity,Integer>();
         for (Severity severity : Severity.values()) {
@@ -216,6 +251,7 @@ public class IoosSosValidator {
         for (SosDocumentType docType : SosDocumentType.values()) {
             footer.append("\n" + DirectorySosDocumentProvider.getDocumentFilename(docType));
         }
+
         formatter.printHelp(usage, header, options, footer.toString());        
     }
 }

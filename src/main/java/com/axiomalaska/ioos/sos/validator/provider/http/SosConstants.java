@@ -18,7 +18,10 @@ public class SosConstants {
     public static final String OUTPUT_FORMAT = "outputFormat";
     
     public static final String GET_OBSERVATION = "GetObservation";
-    
+    public static final String OFFERING = "offering";
+    public static final String OBSERVED_PROPERTY = "observedProperty";
+    public static final String EVENT_TIME = "eventTime";
+    public static final String RESPONSE_FORMAT = "responseFormat";
     
     public static final String IOOS_GOOGLE_CODE_M1_0_TEMPLATE_URL = "https://ioostech.googlecode.com/svn/trunk/templates/Milestone1.0";
 }
