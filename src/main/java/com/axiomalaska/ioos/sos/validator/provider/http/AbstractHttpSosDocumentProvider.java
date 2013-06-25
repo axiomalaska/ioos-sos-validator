@@ -5,20 +5,28 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.net.URL;
+import java.io.IOException;
 import java.util.List;
 
 import net.opengis.ows.x11.ExceptionReportDocument;
 import net.opengis.ows.x11.ExceptionType;
 
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.HttpMethodRetryHandler;
+import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
+import org.apache.http.NoHttpResponseException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.apache.xmlbeans.XmlObject;
 
 import com.axiomalaska.ioos.sos.validator.exception.CompositeSosValidationException;
@@ -28,13 +36,18 @@ import com.axiomalaska.ioos.sos.validator.exception.SosValidationException;
 import com.axiomalaska.ioos.sos.validator.provider.SosDocumentProvider;
 
 public abstract class AbstractHttpSosDocumentProvider extends SosDocumentProvider {
-    ClientConnectionManager cm = new PoolingClientConnectionManager();    
-    private HttpClient client = new DefaultHttpClient(cm);
+
+    private HttpClient client;
     protected URL url;    
     
     public AbstractHttpSosDocumentProvider(URL url) throws InvalidUrlException {
         super();
         this.url = url;
+        
+        ClientConnectionManager cm = new PoolingClientConnectionManager();
+        HttpParams params = new BasicHttpParams();
+        HttpConnectionParams.setConnectionTimeout(params, 500);
+        client = new DefaultHttpClient(cm, params);
     }
 
     public String getUrl(List<NameValuePair> kvps) {        

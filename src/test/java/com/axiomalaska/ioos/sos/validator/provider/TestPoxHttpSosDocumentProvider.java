@@ -11,7 +11,7 @@ import com.axiomalaska.ioos.sos.validator.provider.http.config.RequestConfigurat
 public class TestPoxHttpSosDocumentProvider extends PoxHttpSosDocumentProvider{
     public TestPoxHttpSosDocumentProvider() throws InvalidUrlException, MalformedURLException,
             InvalidRequestConfigurationException {
-        super(new URL("http://ioososs.axiomalaska.com/52n-sos-ioos/sos/pox"),
+        super(new URL("http://localhost:9090/sos/pox"),
                 RequestConfiguration.exampleConfig());
     }    
 }
