@@ -193,4 +193,50 @@
       </plugin>
 	</plugins>  
   </build>
+  
+  <licenses>
+    <license>
+      <name>Unlicense (public domain)</name>
+      <url>http://unlicense.org/UNLICENSE</url>
+      <distribution>repo</distribution>
+    </license>  
+  </licenses>
+
+  <distributionManagement>
+    <repository>
+      <id>axiom_public_releases</id>
+      <name>Axiom Releases</name>
+      <uniqueVersion>false</uniqueVersion>
+      <url>
+        http://nexus.axiomalaska.com/nexus/content/repositories/public-releases
+      </url>
+    </repository>
+    <snapshotRepository>
+      <id>axiom_public_snapshots</id>
+      <name>Axiom Snapshots</name>
+      <uniqueVersion>false</uniqueVersion>
+      <url>
+        http://nexus.axiomalaska.com/nexus/content/repositories/public-snapshots
+      </url>
+    </snapshotRepository>
+  </distributionManagement>
+
+  <scm>
+    <connection>scm:git:git://github.com/axiomalaska/ioos-sos-validator.git</connection>
+    <url>scm:git:git://github.com/axiomalaska/ioos-sos-validator.git</url>
+    <developerConnection>scm:git:git://github.com/axiomalaska/ioos-sos-validator.git</developerConnection>
+  </scm>  
+
+  <developers>
+    <developer>
+      <id>shane-axiom</id>
+      <name>Shane StClair</name>
+      <email>shane@axiomalaska.com</email>
+    </developer>
+  </developers>
+
+  <issueManagement>
+    <url>https://github.com/axiomalaska/ioos-sos-validator/issues</url>
+    <system>GitHub</system>
+  </issueManagement>  
 </project>
