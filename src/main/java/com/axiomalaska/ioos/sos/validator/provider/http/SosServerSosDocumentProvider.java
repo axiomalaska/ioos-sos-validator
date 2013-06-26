@@ -9,6 +9,7 @@ import net.opengis.sensorML.x101.SensorMLDocument;
 import net.opengis.sos.x10.CapabilitiesDocument;
 import net.opengis.swe.x20.DataRecordDocument;
 
+import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
 import org.joda.time.DateTime;
 
@@ -23,7 +24,7 @@ import com.axiomalaska.ioos.sos.validator.provider.http.config.RequestConfigurat
 public abstract class SosServerSosDocumentProvider extends AbstractHttpSosDocumentProvider{
     protected RequestConfiguration config;
     protected static final DateTime DEFAULT_START_TIME = new DateTime("1900-01-01T00:00:00Z");
-    
+
     public SosServerSosDocumentProvider(URL url, RequestConfiguration config)
             throws InvalidUrlException, MalformedURLException, InvalidRequestConfigurationException {        
         super(url);
@@ -58,13 +59,20 @@ public abstract class SosServerSosDocumentProvider extends AbstractHttpSosDocume
             throw new SosValidationException("First ObservationCollection Observation has no result");
         }
 
-        if (!(xbObservation.getResult() instanceof DataRecordDocument)) {
+        XmlObject xbParsedResult;
+        try {
+            xbParsedResult = XmlObject.Factory.parse(xbObservation.getResult().xmlText());
+        } catch (XmlException e) {
+            throw new SosValidationException(e);
+        }
+
+        if (xbParsedResult == null || !(xbParsedResult instanceof DataRecordDocument)) {
             throw new SosValidationException("First ObservationCollection Observation result is not a swe2:DataRecord");
         }
-        
-        return (DataRecordDocument) xbObservation.getResult();
+
+        return (DataRecordDocument) xbParsedResult;
     }
-    
+
     @Override
     protected XmlObject getDocumentXml(SosDocumentType document) throws SosValidationException, CompositeSosValidationException{
         switch(document){
@@ -79,9 +87,9 @@ public abstract class SosServerSosDocumentProvider extends AbstractHttpSosDocume
             case M1_0_OBSERVATION_COLLECTION:
                 return getObservationm1_0(config.getTimeSeriesConstellation(), SosDocumentType.M1_0_OBSERVATION_COLLECTION);
             case M1_0_SWE_TIME_SERIES:
-                getSweDataRecordFromObservationCollectionm1_0(config.getTimeSeriesConstellation(), SosDocumentType.M1_0_SWE_TIME_SERIES);
+                return getSweDataRecordFromObservationCollectionm1_0(config.getTimeSeriesConstellation(), SosDocumentType.M1_0_SWE_TIME_SERIES);
             case M1_0_SWE_TIME_SERIES_PROFILE:
-                getSweDataRecordFromObservationCollectionm1_0(config.getTimeSeriesProfileConstellation(),
+                return getSweDataRecordFromObservationCollectionm1_0(config.getTimeSeriesProfileConstellation(),
                         SosDocumentType.M1_0_SWE_TIME_SERIES_PROFILE);
         }
         return null;

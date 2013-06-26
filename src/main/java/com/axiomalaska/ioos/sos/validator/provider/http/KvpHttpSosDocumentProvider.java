@@ -9,6 +9,7 @@ import net.opengis.om.x10.ObservationCollectionDocument;
 import net.opengis.sensorML.x101.SensorMLDocument;
 import net.opengis.sos.x10.CapabilitiesDocument;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.message.BasicNameValuePair;
@@ -70,12 +71,10 @@ public class KvpHttpSosDocumentProvider extends SosServerSosDocumentProvider{
         kvps.add(new BasicNameValuePair(SosConstants.REQUEST, SosConstants.GET_OBSERVATION));
         kvps.add(new BasicNameValuePair(SosConstants.VERSION, SosConstants.SOS_V1));        
         kvps.add(new BasicNameValuePair(SosConstants.OFFERING, constellation.getOffering()));
-        for (String procedure : constellation.getProcedures()) {
-            kvps.add(new BasicNameValuePair(SosConstants.PROCEDURE, procedure));
-        }
-        for (String observedProperty : constellation.getObservedProperties()) {
-            kvps.add(new BasicNameValuePair(SosConstants.OBSERVED_PROPERTY, observedProperty));
-        }
+        kvps.add(new BasicNameValuePair(SosConstants.PROCEDURE,
+                StringUtils.join(constellation.getProcedures(), ",")));
+        kvps.add(new BasicNameValuePair(SosConstants.OBSERVED_PROPERTY,
+                StringUtils.join(constellation.getObservedProperties(), ",")));
         
         if (constellation.getStartTime() != null || constellation.getEndTime() != null) {
             StringBuilder timeString = new StringBuilder();
@@ -84,12 +83,13 @@ public class KvpHttpSosDocumentProvider extends SosServerSosDocumentProvider{
             } else {
                 timeString.append(DEFAULT_START_TIME.toString());
             }
-
+            timeString.append("/");
             if (constellation.getEndTime() != null) {
                 timeString.append(constellation.getEndTime().toString());
             } else {
                 timeString.append(new DateTime(DateTimeZone.UTC).toString());
-            }            
+            }
+            kvps.add(new BasicNameValuePair(SosConstants.EVENT_TIME, timeString.toString()));
         }
         
         kvps.add(new BasicNameValuePair(SosConstants.RESPONSE_FORMAT, IoosSosConstants.OM_PROFILE_M10));

@@ -4,11 +4,12 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import javax.xml.namespace.QName;
+
 import net.opengis.gml.TimeIndeterminateValueType;
 import net.opengis.gml.TimePeriodType;
 import net.opengis.gml.TimePositionType;
 import net.opengis.ogc.BinaryTemporalOpType;
-import net.opengis.ogc.TMDuringDocument;
 import net.opengis.om.x10.ObservationCollectionDocument;
 import net.opengis.sensorML.x101.SensorMLDocument;
 import net.opengis.sos.x10.CapabilitiesDocument;
@@ -35,7 +36,12 @@ import com.axiomalaska.ioos.sos.validator.provider.http.config.RequestConfigurat
 import com.axiomalaska.ioos.sos.validator.util.XmlHelper;
 
 public class PoxHttpSosDocumentProvider extends SosServerSosDocumentProvider{
-
+    private static final String NS_OGC = "http://www.opengis.net/ogc";
+    private static final String OGC = "ogc";
+    
+    private static final String NS_GML = "http://www.opengis.net/gml";
+    private static final String GML = "gml";
+    
     public PoxHttpSosDocumentProvider(URL url, RequestConfiguration config)
                 throws InvalidUrlException, MalformedURLException, InvalidRequestConfigurationException {
         super(url, config);
@@ -66,8 +72,8 @@ public class PoxHttpSosDocumentProvider extends SosServerSosDocumentProvider{
             throws SosValidationException, CompositeSosValidationException {
         DescribeSensorDocument xbDescribeSensorDoc = DescribeSensorDocument.Factory.newInstance();
         DescribeSensor xbDescribeSensor = xbDescribeSensorDoc.addNewDescribeSensor();
-        xbDescribeSensor.setService(SosConstants.SERVICE);
-        xbDescribeSensor.setVersion(SosConstants.VERSION);
+        xbDescribeSensor.setService(SosConstants.SOS);
+        xbDescribeSensor.setVersion(SosConstants.SOS_V1);
         xbDescribeSensor.setOutputFormat(IoosSosConstants.SML_PROFILE_M10);
         xbDescribeSensor.setProcedure(procedure);
         XmlObject result = sendRequest(xbDescribeSensorDoc);
@@ -80,6 +86,8 @@ public class PoxHttpSosDocumentProvider extends SosServerSosDocumentProvider{
             throws SosValidationException, CompositeSosValidationException {
         GetObservationDocument xbGetObsDoc = GetObservationDocument.Factory.newInstance();
         GetObservation xbGetObs = xbGetObsDoc.addNewGetObservation();
+        xbGetObs.setService(SosConstants.SOS);
+        xbGetObs.setVersion(SosConstants.SOS_V1);
         xbGetObs.setOffering(constellation.getOffering());
         for (String procedure : constellation.getProcedures()) {
             xbGetObs.addProcedure(procedure);
@@ -90,9 +98,11 @@ public class PoxHttpSosDocumentProvider extends SosServerSosDocumentProvider{
         if (constellation.getStartTime() != null || constellation.getEndTime() != null) {
             EventTime xbEventTime = xbGetObs.addNewEventTime();
             BinaryTemporalOpType xbTmDuring = (BinaryTemporalOpType) xbEventTime.addNewTemporalOps()
-                    .substitute(TMDuringDocument.type.getName(), BinaryTemporalOpType.type);            
+                    .substitute(new QName(NS_OGC, "TM_During", OGC), BinaryTemporalOpType.type);
+            xbTmDuring.addNewPropertyName().newCursor().setTextValue("timeFilter");
+
             TimePeriodType xbTimePeriod = (TimePeriodType) xbTmDuring.addNewTimeObject()
-                    .substitute(TimePeriodType.type.getName(), TimePeriodType.type);
+                    .substitute(new QName(NS_GML, "TimePeriod", GML), TimePeriodType.type);
             TimePositionType xbBegin = xbTimePeriod.addNewBeginPosition();
             TimePositionType xbEnd = xbTimePeriod.addNewEndPosition();
                         
@@ -108,7 +118,7 @@ public class PoxHttpSosDocumentProvider extends SosServerSosDocumentProvider{
                 xbEnd.setIndeterminatePosition(TimeIndeterminateValueType.NOW);
             }
         }
-        
+        xbGetObs.setResponseFormat(IoosSosConstants.OM_PROFILE_M10);
         XmlObject result = sendRequest(xbGetObsDoc);
         return XmlHelper.castResult(this, result, ObservationCollectionDocument.class, docType, ObservationCollectionDocument.type);
     }

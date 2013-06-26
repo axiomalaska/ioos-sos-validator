@@ -5,5 +5,5 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({AllTests.class})
-public class TestAllTests extends AllTests{
+public class TestAllTests{
 }

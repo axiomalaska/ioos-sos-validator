@@ -9,10 +9,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Assume;
 import org.junit.Test;
 
 import com.axiomalaska.ioos.sos.validator.IoosSosValidator;
+import static org.junit.Assume.assumeNotNull;
 
 public class IoosSosValidatorIT {
     private static final File shadedJar = getShadedJar("ioos-sos-validator");
@@ -41,27 +41,28 @@ public class IoosSosValidatorIT {
   
     @Test
     public void testLocalDirectoryValidation() throws IOException, InterruptedException{
+        assumeNotNull(shadedJar);
         assertEquals( 0, exec( shadedJar, new String[]{"--" + IoosSosValidator.DIR, "src/test/resources/documents"} ) );
     }
 
     @Test
     public void testHttpValidation() throws IOException, InterruptedException{
         String url = System.getProperty("url");
-        Assume.assumeNotNull(url);
+        assumeNotNull(url);
         assertEquals( 0, exec( shadedJar, new String[]{"--" + IoosSosValidator.URL, url} ) );
     }
     
     @Test
     public void testKvpHttpValidation() throws IOException, InterruptedException{
         String kvpUrl = System.getProperty("kvpUrl");
-        Assume.assumeNotNull(kvpUrl);
+        assumeNotNull(kvpUrl);
         assertEquals( 0, exec( shadedJar, new String[]{"--" + IoosSosValidator.KVP_URL, kvpUrl} ) );
     }
 
     @Test
     public void testPoxHttpValidation() throws IOException, InterruptedException{
         String poxUrl = System.getProperty("poxUrl");
-        Assume.assumeNotNull(poxUrl);
+        assumeNotNull(poxUrl);
         assertEquals( 0, exec( shadedJar, new String[]{"--" + IoosSosValidator.POX_URL, poxUrl} ) );
     }    
 }

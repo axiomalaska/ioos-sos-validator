@@ -11,7 +11,7 @@ import com.axiomalaska.ioos.sos.validator.provider.http.config.RequestConfigurat
 public class TestKvpHttpSosDocumentProvider extends KvpHttpSosDocumentProvider{
     public TestKvpHttpSosDocumentProvider() throws InvalidUrlException, MalformedURLException,
             InvalidRequestConfigurationException {
-        super(new URL("http://localhost:9090/sos/kvp"),
+        super(new URL("http://localhost:9090/webapp-ioos/sos/kvp"),
                 RequestConfiguration.exampleConfig());
     }    
 }
