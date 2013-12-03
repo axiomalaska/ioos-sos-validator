@@ -28,7 +28,7 @@ public class XmlHelper {
         return children;
     }
     
-    public static <T> T castResult(SosDocumentProvider provider, XmlObject xmlObject, Class<T> clazz, SosDocumentType targetDocType,
+    public static <T> T castResult(SosDocumentProvider provider, XmlObject xmlObject, Class<T> clazz, SosDocumentType targetDocType,            
             SchemaType targetSchemaType) throws InvalidSosDocumentException{
         if (clazz.isAssignableFrom(xmlObject.getClass())) {
             return (T) clazz.cast(xmlObject);

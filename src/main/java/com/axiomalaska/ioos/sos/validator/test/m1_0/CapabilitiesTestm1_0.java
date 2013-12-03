@@ -92,7 +92,7 @@ public class CapabilitiesTestm1_0 extends AbstractCapabilitiesTest{
         }
 
         if (!ioosVersionFound) {
-            fail(IoosSosConstants.IOOS_VERSION_DEFINITION + "metaDataProperty not present");
+            fail(IoosSosConstants.IOOS_VERSION_DEFINITION + " metaDataProperty not present");
         }
 
         if (!softwareVersionFound) {

@@ -13,9 +13,12 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.axiomalaska.ioos.sos.validator.exception.CompositeSosValidationException;
 import com.axiomalaska.ioos.sos.validator.exception.SosValidationException;
@@ -33,6 +36,9 @@ import com.axiomalaska.ioos.sos.validator.util.VersionHelper;
 import com.axiomalaska.ioos.sos.validator.xstream.XStreamRepository;
 
 public class IoosSosValidator {
+    public static final Logger LOG = LoggerFactory.getLogger(IoosSosValidator.class);
+    private static final String LOG_DIVIDER = StringUtils.repeat('-',  70);
+    
     public static final String HELP = "help";
     public static final String URL = "url";
     public static final String KVP_URL = "kvp-url";
@@ -68,7 +74,7 @@ public class IoosSosValidator {
         try {
             line = new BasicParser().parse( options, args );            
         } catch (ParseException e) {
-            System.out.println( "Unexpected exception: " + e.getMessage() );
+            LOG.error("Unexpected exception: " + e.getMessage());
             System.exit(1);
         }
 
@@ -76,7 +82,7 @@ public class IoosSosValidator {
             displayHelp(options);
             System.exit(0);
         } else if (line.hasOption(EXAMPLE_REQUEST_CONFIG)) {
-            System.out.println(XStreamRepository.instance().toXML(RequestConfiguration.exampleConfig()));
+            LOG.info(XStreamRepository.instance().toXML(RequestConfiguration.exampleConfig()));
             System.exit(0);            
         } else if (line.hasOption(GOOGLE_CODE)){
             String version = line.getOptionValue(GOOGLE_CODE);
@@ -84,19 +90,19 @@ public class IoosSosValidator {
                 try {
                     SosDocumentProviderRepository.addProvider(new IoosGoogleCodeProvider());
                 } catch (Exception e){
-                    System.out.println("Google code URL is invalid, contact developer.");
+                    LOG.error("Google code URL is invalid, contact developer.");
                     System.exit(1);
                 }
             } else {
-                System.out.println("Invalid milestone version. Valid versions are: 1.0.");
+                LOG.error("Invalid milestone version. Valid versions are: 1.0.");
                 System.exit(1);                
             }
         } else if (line.hasOption(DIR)){
             String dirStr = line.getOptionValue(DIR);
             File rootDir = getFile(dirStr);
             if (!rootDir.exists()) {
-                System.out.println("Local directory " + dirStr + " doesn't exist");
-                System.out.println("Current directory is " + System.getProperty("user.dir"));
+                LOG.error("Local directory " + dirStr + " doesn't exist");
+                LOG.info("Current directory is " + System.getProperty("user.dir"));
                 System.exit(1);
             }
             SosDocumentProviderRepository.addProvider(new DirectorySosDocumentProvider(rootDir));
@@ -105,7 +111,7 @@ public class IoosSosValidator {
             String poxUrlValue = line.hasOption(POX_URL) ? line.getOptionValue(POX_URL) : line.getOptionValue(URL);
             
             if (!line.hasOption(REQUEST_CONFIG)) {
-                System.out.println("-" + requestConfig.getOpt() + " (--" + requestConfig.getLongOpt() + ") is required"
+                LOG.error("-" + requestConfig.getOpt() + " (--" + requestConfig.getLongOpt() + ") is required"
                         + " when testing SOS servers");
                 System.exit(1);                
             }
@@ -113,13 +119,13 @@ public class IoosSosValidator {
             String requestConfigValue = line.getOptionValue(REQUEST_CONFIG);
             File requestConfigFile = getFile(requestConfigValue);
             if (!requestConfigFile.exists()){
-                System.out.println("-" + requestConfig.getOpt() + " (--" + requestConfig.getLongOpt() + ") file " +
+                LOG.error("-" + requestConfig.getOpt() + " (--" + requestConfig.getLongOpt() + ") file " +
                         requestConfigValue + " doesn't exist");
                 System.exit(1);                                
             }
             Object requestConfigObject = XStreamRepository.instance().fromXML(requestConfigFile);
             if (!(requestConfigObject instanceof RequestConfiguration)) {
-                System.out.println("-" + requestConfig.getOpt() + " (--" + requestConfig.getLongOpt() + ") file " +
+                LOG.error("-" + requestConfig.getOpt() + " (--" + requestConfig.getLongOpt() + ") file " +
                         requestConfigValue + " is not a valid RequestConfiguration");
                 System.exit(1);                                                
             }
@@ -130,7 +136,7 @@ public class IoosSosValidator {
                     SosDocumentProviderRepository.addProvider(new KvpHttpSosDocumentProvider(
                             new URL(kvpUrlValue), requestConfiguration));
                 } catch (Exception e) {
-                    System.out.println("Invalid kvp url:" + e.getMessage() );
+                    LOG.error("Invalid kvp url:" + e.getMessage() );
                     System.exit(1);
                 }
             }
@@ -140,7 +146,7 @@ public class IoosSosValidator {
                     SosDocumentProviderRepository.addProvider(new PoxHttpSosDocumentProvider(
                             new URL(poxUrlValue), requestConfiguration));
                 } catch (Exception e) {
-                    System.out.println("Invalid pox url:" + e.getMessage() );
+                    LOG.error("Invalid pox url:" + e.getMessage() );
                     System.exit(1);
                 }
             }
@@ -150,33 +156,41 @@ public class IoosSosValidator {
         }
 
         if (SosDocumentProviderRepository.providers().isEmpty()){
-            System.out.println("No SosDocumentProviders! Exiting.");
+            LOG.error("No SosDocumentProviders! Exiting.");
             System.exit(1);
         } else {
-            System.out.println("SosDocumentProviders:");
+            StringBuilder providers = new StringBuilder();
+            int providerCounter = 0;
             for (SosDocumentProvider provider : SosDocumentProviderRepository.providers()){
-                System.out.println(provider);
-            }
+                if(providerCounter++ > 0) {
+                    providers.append(", ");
+                }
+                providers.append(provider.toString());
+            }            
+            LOG.info("SosDocumentProviders: " + providers.toString());
         }
         
-        System.out.println();
-        System.out.println("Running tests...");
+        LOG.info("Running tests...");
 
         Result result = JUnitCore.runClasses(AllTests.class);
-        for (Failure failure : result.getFailures()){
-            System.out.println(failure.toString());
+        if (result.getFailureCount() > 0) {
+            LOG.warn("TEST FAILURES");
+            for (Failure failure : result.getFailures()){
+                LOG.info(LOG_DIVIDER);
+                LOG.warn(failure.getDescription().getClassName());
+                LOG.warn(failure.getDescription().getMethodName());
+                LOG.warn(failure.getMessage());
+            }
+            LOG.info(LOG_DIVIDER);            
         }
+        LOG.info("Tests complete");
 
-        System.out.println();
-        System.out.println("Tests complete");
-
-        System.out.println();
-        System.out.println("Tests performed: " + result.getRunCount());
-        System.out.println("Tests ignored: " + result.getIgnoreCount());
-        System.out.println("Tests failed: " + result.getFailureCount());
-        System.out.println("Run time: " + result.getRunTime());        
-
-        System.out.println();
+        LOG.info(LOG_DIVIDER);
+        LOG.info("Tests performed: " + result.getRunCount());
+        LOG.info("Tests ignored: " + result.getIgnoreCount());
+        LOG.info("Tests failed: " + result.getFailureCount());
+        LOG.info("Run time: " + result.getRunTime());        
+        LOG.info(LOG_DIVIDER);
         
         List<Throwable> exceptions = new ArrayList<Throwable>();
         for (Failure failure : result.getFailures()){
@@ -184,17 +198,16 @@ public class IoosSosValidator {
         }
         
         Map<Severity,Integer> severityCounts = processExceptions(exceptions);
-        System.out.println();
-        System.out.println("Failure severity summary:");
+        LOG.info("Failure severity summary:");
         for (Severity severity : Severity.values()) {
-            System.out.println(severity.name() + ": " + severityCounts.get(severity));
+            LOG.info(severity.name() + ": " + severityCounts.get(severity));
         }
         
-        System.out.println();
+        LOG.info(LOG_DIVIDER);
         if (severityCounts.get(Severity.FATAL).equals(0)){
-            System.out.println("VALIDATION SUCCESSFUL");
+            LOG.info("VALIDATION SUCCESSFUL");
         } else {
-            System.out.println("VALIDATION FAILED");
+            LOG.warn("VALIDATION FAILED");
             System.exit(1);
         }
     }
