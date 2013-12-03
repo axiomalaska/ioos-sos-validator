@@ -13,11 +13,14 @@ import net.opengis.sos.x10.CapabilitiesDocument;
 
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
+
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeNotNull;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -53,7 +56,7 @@ public class CapabilitiesTestm1_0 extends AbstractCapabilitiesTest{
     }
     
     @Test
-    public void checkIoosVersion() throws XmlException{
+    public void checkMetaData() throws XmlException{
         assumeNotNull(xbCapabilities);
         
         //check ows:OperationsMetadata
@@ -66,21 +69,45 @@ public class CapabilitiesTestm1_0 extends AbstractCapabilitiesTest{
         
         //check gml:metaDataProperty
         List<MetaDataPropertyDocument> metaDataProps = XmlHelper.getChildren(xbExtendedCaps, MetaDataPropertyDocument.class);
-        assertFalse("Duplicate " + IoosSosConstants.IOOS_TEMPLATE_VERSION, metaDataProps.size() >= 2);
-        assertFalse(IoosSosConstants.IOOS_TEMPLATE_VERSION + " missing", metaDataProps.size() == 0);
-        MetaDataPropertyType xbTemplateVersionMetadata = metaDataProps.get(0).getMetaDataProperty();
-        assertNotNull(IoosSosConstants.IOOS_TEMPLATE_VERSION + " missing href", xbTemplateVersionMetadata.getHref());
-        assertTrue(IoosSosConstants.IOOS_TEMPLATE_VERSION + " href is empty", xbTemplateVersionMetadata.getHref().length() > 0);
-        assertEquals(IoosSosConstants.IOOS_TEMPLATE_VERSION + "'s href is not " + IoosSosConstants.IOOS_VERSION_DEFINITION,
-                IoosSosConstants.IOOS_VERSION_DEFINITION, xbTemplateVersionMetadata.getHref());
-                
-        //check gml:version
-        List<VersionDocument> versions = XmlHelper.getChildren(xbTemplateVersionMetadata, VersionDocument.class);
+        assertFalse("no metaDataProperties found", metaDataProps.size() == 0);
+        boolean ioosVersionFound = false;
+        boolean softwareVersionFound = false;
+        for (int i = 0; i < metaDataProps.size(); i++) {
+            MetaDataPropertyType metaDataProperty = metaDataProps.get(i).getMetaDataProperty();
+            assertNotNull("metaDataProperty title is missing", metaDataProperty.getTitle());
+            assertTrue("metaDataProperty title is empty", metaDataProperty.getTitle().length() > 0);
+            if (metaDataProperty.getTitle().equals(IoosSosConstants.IOOS_TEMPLATE_VERSION)) {
+                ioosVersionFound = true;
+                assertNotNull("metaDataProperty href is missing", metaDataProperty.getHref());
+                assertTrue("metaDataProperty href is empty", metaDataProperty.getHref().length() > 0);
+                assertEquals(IoosSosConstants.IOOS_TEMPLATE_VERSION + "'s href should be " + IoosSosConstants.IOOS_VERSION_DEFINITION,
+                        IoosSosConstants.IOOS_VERSION_DEFINITION, metaDataProperty.getHref());            
+                String version = checkVersion(metaDataProperty);
+                assertEquals(IoosSosConstants.IOOS_VERSION_DEFINITION + " is not " + IoosSosConstants.IOOS_VERSION_M10,
+                        IoosSosConstants.IOOS_VERSION_M10, version);                
+            } else if (metaDataProperty.getTitle().equals(IoosSosConstants.SOFTWARE_VERSION)) {
+                softwareVersionFound = true;
+                checkVersion(metaDataProperty);
+            }
+        }
+
+        if (!ioosVersionFound) {
+            fail(IoosSosConstants.IOOS_VERSION_DEFINITION + "metaDataProperty not present");
+        }
+
+        if (!softwareVersionFound) {
+            //don't fail, not required yet
+//            fail(IoosSosConstants.SOFTWARE_VERSION + "metaDataProperty not present");
+        }
+
+    }
+
+    private String checkVersion(MetaDataPropertyType metaDataProperty) throws XmlException {
+        List<VersionDocument> versions = XmlHelper.getChildren(metaDataProperty, VersionDocument.class);
         assertFalse("Duplicate gml:version", versions.size() >= 2);
         assertFalse("gml:verison missing", versions.size() == 0);
         String version = versions.get(0).getVersion();
-        assertEquals("gml:version is not " + IoosSosConstants.IOOS_VERSION_M10,
-                IoosSosConstants.IOOS_VERSION_M10, version);
+        return version;
     }
     
     @Test
@@ -106,10 +133,10 @@ public class CapabilitiesTestm1_0 extends AbstractCapabilitiesTest{
         //serviceType
         assertNotNull("ows:ServiceIdentification/ows:ServiceType is missing.", xbServiceIdentification.getServiceType());
         CodeType xbServiceType = xbServiceIdentification.getServiceType();
-        assertEquals("ows:ServiceIdentification/ows:ServiceType value is incorrect", xbServiceType.getStringValue(),
-                IoosSosConstants.SI_SERVICE_TYPE);
-        assertEquals("ows:ServiceIdentification/ows:ServiceType codeSpace is incorrect", xbServiceType.getCodeSpace(),
-                IoosSosConstants.SI_SERVICE_TYPE_CODE_SPACE);
+        assertEquals("ows:ServiceIdentification/ows:ServiceType value is incorrect", IoosSosConstants.SI_SERVICE_TYPE,
+                xbServiceType.getStringValue());
+        assertEquals("ows:ServiceIdentification/ows:ServiceType codeSpace is incorrect", IoosSosConstants.SI_SERVICE_TYPE_CODE_SPACE,
+                xbServiceType.getCodeSpace());
         
         //serviceTypeVersion
         assertTrue("ows:ServiceIdentification/ows:ServiceTypeVersion is missing.",

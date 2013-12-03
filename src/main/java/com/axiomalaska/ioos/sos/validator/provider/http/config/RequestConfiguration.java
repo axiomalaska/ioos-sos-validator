@@ -2,7 +2,11 @@ package com.axiomalaska.ioos.sos.validator.provider.http.config;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.n52.sos.ioos.asset.NetworkAsset;
+import org.n52.sos.ioos.asset.SensorAsset;
+import org.n52.sos.ioos.asset.StationAsset;
 
+import com.axiomalaska.ioos.sos.IoosSosUtil;
 import com.axiomalaska.ioos.sos.validator.xstream.XStreamRepository;
 import com.axiomalaska.phenomena.Phenomena;
 import com.axiomalaska.phenomena.UnitCreationException;
@@ -125,53 +129,37 @@ public class RequestConfiguration {
     }
 
     public static RequestConfiguration exampleConfig(){
-        String offering = "urn:ioos:network:test:all";
-        String prudhoe = "urn:ioos:station:test:prudhoe";
-        String blighreef = "urn:ioos:station:test:blighreef";
-        String nikiski = "urn:ioos:station:test:nikiski";
+        NetworkAsset offering = new NetworkAsset("test", "all");
+        StationAsset station = new StationAsset("test", "1");
         String airTemp = null;
         String seaWaterTemp = null;
-        String windSpeed = null;
-        String directionOfSeaWaterVelocity = null;
-        String seaWaterSpeed = null;
-        String seaWaterPracticalSalinity = null;
         try {
             airTemp = Phenomena.instance().AIR_TEMPERATURE.getId();
             seaWaterTemp = Phenomena.instance().SEA_WATER_TEMPERATURE.getId();
-            windSpeed = Phenomena.instance().WIND_SPEED.getId();
-            directionOfSeaWaterVelocity = Phenomena.instance().DIRECTION_OF_SEA_WATER_VELOCITY.getId();
-            seaWaterSpeed = Phenomena.instance().SEA_WATER_SPEED.getId();
-            seaWaterPracticalSalinity = Phenomena.instance().SEA_WATER_PRACTICAL_SALINITY.getId();
         } catch (UnitCreationException e) {
             e.printStackTrace();
         }
+        SensorAsset airTempSensor = new SensorAsset(station, IoosSosUtil.getNameFromUri(airTemp));
         
         RequestConfiguration config = new RequestConfiguration();
-        config.setNetworkSmlProcedure(offering);
-        config.setStationSmlProcedure(prudhoe);
-        config.setSensorSmlProcedure("urn:ioos:sesnor:test:prudhoe:airtemp");
+        config.setNetworkSmlProcedure(offering.getAssetId());
+        config.setStationSmlProcedure(station.getAssetId());
+        config.setSensorSmlProcedure(airTempSensor.getAssetId());
         
         GetObservationConstellation timeSeriesConstellation = new GetObservationConstellation();
-        timeSeriesConstellation.setOffering(offering);
-        timeSeriesConstellation.addProcedure(prudhoe);
-        timeSeriesConstellation.addProcedure(blighreef);
+        timeSeriesConstellation.setOffering(offering.getAssetId());
+        timeSeriesConstellation.addProcedure(station.getAssetId());
         timeSeriesConstellation.addObservedProperty(airTemp);
-        timeSeriesConstellation.addObservedProperty(seaWaterTemp);
-        timeSeriesConstellation.addObservedProperty(windSpeed);
-        timeSeriesConstellation.setStartTime(new DateTime("2010-02-11T00:00:00Z", DateTimeZone.UTC));
-        timeSeriesConstellation.setEndTime(new DateTime("2013-08-03T00:00:00Z", DateTimeZone.UTC));
-        
+        timeSeriesConstellation.setStartTime(new DateTime("2010-01-01T00:00:00Z", DateTimeZone.UTC));
+        timeSeriesConstellation.setEndTime(new DateTime(DateTimeZone.UTC));        
         config.setTimeSeriesConstellation(timeSeriesConstellation);
 
         GetObservationConstellation timeSeriesProfileConstellation = new GetObservationConstellation();
-        timeSeriesProfileConstellation.setOffering(offering);
-        timeSeriesProfileConstellation.addProcedure(blighreef);
-        timeSeriesProfileConstellation.addProcedure(nikiski);        
-        timeSeriesProfileConstellation.addObservedProperty(directionOfSeaWaterVelocity);
-        timeSeriesProfileConstellation.addObservedProperty(seaWaterSpeed);
+        timeSeriesProfileConstellation.setOffering(offering.getAssetId());
+        timeSeriesProfileConstellation.addProcedure(station.getAssetId());        
         timeSeriesProfileConstellation.addObservedProperty(seaWaterTemp);
-        timeSeriesProfileConstellation.addObservedProperty(seaWaterPracticalSalinity);
-        timeSeriesProfileConstellation.setStartTime(new DateTime("2012-01-01T00:00:00Z", DateTimeZone.UTC));        
+        timeSeriesConstellation.setStartTime(new DateTime("2010-01-01T00:00:00Z", DateTimeZone.UTC));
+        timeSeriesConstellation.setEndTime(new DateTime(DateTimeZone.UTC));        
         config.setTimeSeriesProfileConstellation(timeSeriesProfileConstellation);
 
         return config;

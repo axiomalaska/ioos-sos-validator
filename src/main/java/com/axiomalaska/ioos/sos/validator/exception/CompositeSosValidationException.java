@@ -27,4 +27,9 @@ public class CompositeSosValidationException extends Exception{
     public String toString() {
         return exceptions.toString();
     }
+
+    @Override
+    public String getMessage() {
+        return toString();
+    }    
 }
