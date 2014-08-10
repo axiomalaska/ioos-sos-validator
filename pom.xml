@@ -222,9 +222,9 @@
   </distributionManagement>
 
   <scm>
-    <connection>scm:git:git://github.com/axiomalaska/ioos-sos-validator.git</connection>
-    <url>scm:git:git://github.com/axiomalaska/ioos-sos-validator.git</url>
-    <developerConnection>scm:git:git://github.com/axiomalaska/ioos-sos-validator.git</developerConnection>
+    <connection>scm:git:https://github.com/ioos/ioos-sos-validator.git</connection>
+    <url>scm:git:https://github.com/ioos/ioos-sos-validator.git</url>
+    <developerConnection>scm:git:https://github.com/ioos/ioos-sos-validator.git</developerConnection>
   </scm>  
 
   <developers>
