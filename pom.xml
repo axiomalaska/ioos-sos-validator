@@ -4,7 +4,7 @@
 
   <groupId>com.axiomalaska</groupId>
   <artifactId>ioos-sos-validator</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>ioos-sos-validator</name>
@@ -83,11 +83,6 @@
       <version>${n52.common.xml.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.axiomalaska</groupId>
-      <artifactId>ioos-sos-common</artifactId>
-      <version>0.1-SNAPSHOT</version>    
-    </dependency>
-    <dependency>
       <groupId>commons-cli</groupId>
       <artifactId>commons-cli</artifactId>
       <version>1.2</version>
@@ -100,7 +95,7 @@
     <dependency>
       <groupId>com.axiomalaska</groupId>
       <artifactId>phenomena</artifactId>
-      <version>0.2-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.thoughtworks.xstream</groupId>
