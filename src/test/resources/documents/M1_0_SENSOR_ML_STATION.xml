@@ -17,7 +17,7 @@
   <sml:capabilities name="ioosServiceMetadata">
     <swe:SimpleDataRecord>
       <swe:field name="ioosTemplateVersion">
-        <swe:Text definition="http://code.google.com/p/ioostech/source/browse/#svn%2Ftrunk%2Ftemplates%2FMilestone1.0">
+        <swe:Text definition="https://github.com/ioos/sos-guidelines/tree/master/template/milestone1.0">
           <swe:value>1.0</swe:value>
         </swe:Text>
       </swe:field>
@@ -109,7 +109,7 @@
       <sml:capabilities name="observationTimeRange">
         <swe:DataRecord>
           <swe:field name="observationTimeRange">
-            <swe:TimeRange definition="http://mmisw.org/ont/ioos/definition/observationTimeRange">
+            <swe:TimeRange definition="http://mmisw.org/ont/ioos/swe_element_type/observationTimeRange">
               <swe:value>2008-04-28T08:00:00.000Z 2012-12-27T19:00:00.000Z</swe:value>
             </swe:TimeRange>
           </swe:field>

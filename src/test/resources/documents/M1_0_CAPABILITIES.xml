@@ -108,8 +108,12 @@
     </ows:Parameter>
     <ows:ExtendedCapabilities>
       <gml:metaDataProperty xlink:title="ioosTemplateVersion" 
-        xlink:href="http://code.google.com/p/ioostech/source/browse/#svn%2Ftrunk%2Ftemplates%2FMilestone1.0">
+        xlink:href="https://github.com/ioos/sos-guidelines/tree/master/template/milestone1.0">
         <gml:version>1.0</gml:version>
+      </gml:metaDataProperty>
+      <gml:metaDataProperty xlink:title="softwareVersion" 
+          xlink:href="http://someURI">
+          <gml:version>0.9.4.5</gml:version>
       </gml:metaDataProperty>
     </ows:ExtendedCapabilities>    
   </ows:OperationsMetadata>
@@ -123,7 +127,7 @@
     <sos:ObservationOfferingList>
     
       <!-- NETWORK_ALL -->
-      <sos:ObservationOffering gml:id="network-all">
+      <sos:ObservationOffering gml:id="network_all">
         <gml:description>All stations</gml:description>
         <gml:name>urn:ioos:network:AUTHORITY:all</gml:name>
         <gml:srsName>EPSG:4326</gml:srsName>
@@ -146,7 +150,7 @@
         <sos:observedProperty xlink:href="http://mmisw.org/ont/cf/parameter/VALUE"/>
         <sos:observedProperty xlink:href="http://mmisw.org/ont/cf/parameter/COMPOSITE_VALUE"/>
         <sos:featureOfInterest xlink:href="FEATURE"/>
-        <sos:responseFormat>text/xml;schema="om/1.0.0/profiles/ioos_sos/1.0"</sos:responseFormat>
+        <sos:responseFormat>text/xml;subtype="om/1.0.0/profiles/ioos_sos/1.0"</sos:responseFormat>
         <sos:resultModel>om:ObservationCollection</sos:resultModel>
         <sos:responseMode>inline</sos:responseMode>
       </sos:ObservationOffering>
@@ -155,7 +159,7 @@
       <!-- It is not scalable to list individual platforms or sensors here however -->
       <!-- listing additional logical groupings by provide, region, measurement type etc -->
       <!-- is encouraged! -->
-      <sos:ObservationOffering gml:id="network-favorites">
+      <sos:ObservationOffering gml:id="network_favorites">
         <gml:description>All stations</gml:description>
         <gml:name>urn:ioos:network:AUTHORITY:favorites</gml:name>
         <gml:srsName>EPSG:4326</gml:srsName>
@@ -178,7 +182,7 @@
         <sos:observedProperty xlink:href="http://mmisw.org/ont/cf/parameter/VALUE"/>
         <sos:observedProperty xlink:href="http://mmisw.org/ont/cf/parameter/COMPOSITE_VALUE"/>
         <sos:featureOfInterest xlink:href="FEATURE"/>
-        <sos:responseFormat>text/xml;schema="om/1.0.0/profiles/ioos_sos/1.0"</sos:responseFormat>
+        <sos:responseFormat>text/xml;subtype="om/1.0.0/profiles/ioos_sos/1.0"</sos:responseFormat>
         <sos:resultModel>om:ObservationCollection</sos:resultModel>
         <sos:responseMode>inline</sos:responseMode>
       </sos:ObservationOffering>
