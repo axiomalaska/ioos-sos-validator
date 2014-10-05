@@ -27,7 +27,7 @@ import com.axiomalaska.ioos.sos.validator.provider.DirectorySosDocumentProvider;
 import com.axiomalaska.ioos.sos.validator.provider.SosDocumentProvider;
 import com.axiomalaska.ioos.sos.validator.provider.SosDocumentProviderRepository;
 import com.axiomalaska.ioos.sos.validator.provider.SosDocumentType;
-import com.axiomalaska.ioos.sos.validator.provider.http.IoosGoogleCodeProvider;
+import com.axiomalaska.ioos.sos.validator.provider.http.IoosGitHubProvider;
 import com.axiomalaska.ioos.sos.validator.provider.http.KvpHttpSosDocumentProvider;
 import com.axiomalaska.ioos.sos.validator.provider.http.PoxHttpSosDocumentProvider;
 import com.axiomalaska.ioos.sos.validator.provider.http.config.RequestConfiguration;
@@ -46,7 +46,7 @@ public class IoosSosValidator {
     public static final String REQUEST_CONFIG = "request-config";
     public static final String EXAMPLE_REQUEST_CONFIG = "example-request-config";
     public static final String DIR = "dir";
-    public static final String GOOGLE_CODE = "google-code";
+    public static final String GITHUB = "github";
     
     public static void main(String[] args){
         Options options = new Options();
@@ -59,11 +59,11 @@ public class IoosSosValidator {
         Option exampleRequestConfig = new Option("erc",EXAMPLE_REQUEST_CONFIG,false,"Print an example request configuration.");
         
         Option dir = new Option("d",DIR,true,"Path to local directory containing xml files with standard names");
-        Option googleCode = new Option("gc",GOOGLE_CODE,true,"Validate against Google Code IOOS SOS template respository (specify version, i.e. 1.0)");
+        Option github = new Option("gh",GITHUB,true,"Validate against GitHub IOOS SOS template respository (specify version, i.e. 1.0)");
         
         options.addOption(help);
         options.addOption(dir);
-        options.addOption(googleCode);
+        options.addOption(github);
         options.addOption(url);
         options.addOption(kvpUrl);
         options.addOption(poxUrl);
@@ -84,13 +84,13 @@ public class IoosSosValidator {
         } else if (line.hasOption(EXAMPLE_REQUEST_CONFIG)) {
             LOG.info(XStreamRepository.instance().toXML(RequestConfiguration.exampleConfig()));
             System.exit(0);            
-        } else if (line.hasOption(GOOGLE_CODE)){
-            String version = line.getOptionValue(GOOGLE_CODE);
+        } else if (line.hasOption(GITHUB)){
+            String version = line.getOptionValue(GITHUB);
             if (version.equals("1.0")){
                 try {
-                    SosDocumentProviderRepository.addProvider(new IoosGoogleCodeProvider());
+                    SosDocumentProviderRepository.addProvider(new IoosGitHubProvider());
                 } catch (Exception e){
-                    LOG.error("Google code URL is invalid, contact developer.");
+                    LOG.error("GitHub URL is invalid, contact developer.");
                     System.exit(1);
                 }
             } else {
@@ -258,7 +258,7 @@ public class IoosSosValidator {
         
         String header = "\nIOOS SOS Validator, version " + VersionHelper.getVersion()
         		+ "\nValidate SOS response documents to IOOS standards. Can validate against a live SOS server, a local"
-                + " directory of XML files, or the IOOS Google Code SOS response respository. Currently supports IOOS SOS milestone 1.0.";
+                + " directory of XML files, or the IOOS GitHub SOS response respository. Currently supports IOOS SOS milestone 1.0.";
         
         StringBuilder footer = new StringBuilder("\nLocal directory filename patterns:");
         for (SosDocumentType docType : SosDocumentType.values()) {

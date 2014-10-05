@@ -10,9 +10,9 @@ import com.axiomalaska.ioos.sos.validator.exception.InvalidUrlException;
 import com.axiomalaska.ioos.sos.validator.exception.SosValidationException;
 import com.axiomalaska.ioos.sos.validator.provider.SosDocumentType;
 
-public class IoosGoogleCodeProvider extends StaticHttpSosDocumentProvider{
-    public IoosGoogleCodeProvider() throws MalformedURLException, InvalidUrlException{
-        super(new URL(SosConstants.IOOS_GOOGLE_CODE_M1_0_TEMPLATE_URL));
+public class IoosGitHubProvider extends StaticHttpSosDocumentProvider{
+    public IoosGitHubProvider() throws MalformedURLException, InvalidUrlException{
+        super(new URL(SosConstants.IOOS_GITHUB_M1_0_TEMPLATE_URL));
     }
     
     @Override

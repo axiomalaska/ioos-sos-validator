@@ -23,5 +23,5 @@ public class SosConstants {
     public static final String EVENT_TIME = "eventTime";
     public static final String RESPONSE_FORMAT = "responseFormat";
     
-    public static final String IOOS_GOOGLE_CODE_M1_0_TEMPLATE_URL = "https://ioostech.googlecode.com/svn/trunk/templates/Milestone1.0";
+    public static final String IOOS_GITHUB_M1_0_TEMPLATE_URL = "https://raw.githubusercontent.com/ioos/sos-guidelines/master/template/milestone1.0";
 }
