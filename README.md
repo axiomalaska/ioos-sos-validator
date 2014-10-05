@@ -13,3 +13,9 @@ Validation tool for IOOS SOS responses. Use it:
  * On the command line, against a live SOS server
  * On the command line, against a directory of XML files
  * On the command line, against the IOOS SOS GitHub template repository
+
+### Examples
+
+Validate the [IOOS GitHub SOS milestone 1.0 templates](https://github.com/ioos/sos-guidelines/tree/master/template/milestone1.0):
+
+    java -jar ioos-sos-validator.jar -gh 1.0
