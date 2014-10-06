@@ -1,9 +1,12 @@
 # IOOS SOS Validator
 
-## NOTE: This project has been superseded
-This project is still useful for simple schema validation of SOS responses and templates.
+## NOTE: For IOOS SOS compliance testing, see [ioos-sos-compliance-tests](https://github.com/ioos/ioos-sos-compliance-tests) 
 
-For more thorough IOOS standard validation see the [ioos-sos-compliance-tests](https://github.com/ioos/ioos-sos-compliance-tests) project.
+This project is still useful for simple schema validation of SOS responses and templates. It is used in the build process of the 
+[i52n-SOS](https://github.com/ioos/i52n-sos) project.  However, comprehensive tests ensuring IOOS SOS template compliance have not
+been implemented in this project.
+
+For more thorough IOOS SOS standard validation see the [ioos-sos-compliance-tests](https://github.com/ioos/ioos-sos-compliance-tests) project.
 
 ###Usage 
 
